@@ -37,9 +37,11 @@ Please provide answers to these questions using markdown notation and place them
 3. Please provide a link to the repository you are using for this class.
 
 https://github.com/godofthecrabz/CS283
+
 4. Briefly describe what you want to get out of this class.
 
 I want to learn about the proper way to do systems programming. I've been working on a game engine for the past three years and I think this class will teach me things that will help with the development of my engine.
+
 5. Briefly describe any concerns you might be having with being successful in this class (if any).
 
 I don't have any concerns. I am very excited to learn in this class and consider myself comfortable in my programming skills.
