@@ -17,7 +17,30 @@ int  count_words(char *, int, int);
 
 int setup_buff(char *buff, char *user_str, int len){
     //TODO: #4:  Implement the setup buff as per the directions
-    return 0; //for now just so the code compiles. 
+    // Initialize user string counter and whitespace counter to 0
+    int strLen = 0;
+    int whitespace = 0;
+    while (user_str) {
+        if (strLen > len) {
+            return -1;
+        }
+        if (*user_str == ' ' || *user_str == '\t' || *user_str == '\b' || *user_str == '\n') {
+            if (whitespace == 0) {
+                *buff = ' ';
+                buff++;
+                strLen++;
+            }
+            whitespace++;
+            user_str++;
+            continue;
+        }
+        whitespace = 0;
+        *buff = *user_str;
+        buff++;
+        user_str++;
+        strLen++;
+    }
+    return strLen;
 }
 
 void print_buff(char *buff, int len){
