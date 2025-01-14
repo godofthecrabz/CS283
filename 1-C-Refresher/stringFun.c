@@ -20,10 +20,13 @@ int setup_buff(char *buff, char *user_str, int len){
     // Initialize user string counter and whitespace counter to 0
     int strLen = 0;
     int whitespace = 0;
-    while (user_str) {
+    // Loop until user_str is empty
+    while (*user_str) {
+        // Check if user_str is larger than buff
         if (strLen > len) {
             return -1;
         }
+        // Check for whitespace characters and handle repeating whitespace
         if (*user_str == ' ' || *user_str == '\t' || *user_str == '\b' || *user_str == '\n') {
             if (whitespace == 0) {
                 *buff = ' ';
@@ -34,11 +37,20 @@ int setup_buff(char *buff, char *user_str, int len){
             user_str++;
             continue;
         }
+        // Reset whitespace counter
         whitespace = 0;
+        // Put non-whitespace characters into buff
         *buff = *user_str;
         buff++;
         user_str++;
         strLen++;
+    }
+    // Fill rest of buff with .
+    int i = strLen;
+    while (i < len) {
+        *buff = '.';
+        buff++;
+        i++;
     }
     return strLen;
 }
