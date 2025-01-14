@@ -49,7 +49,11 @@ int main(int argc, char *argv[]){
     int  user_str_len;      //length of user supplied string
 
     //TODO:  #1. WHY IS THIS SAFE, aka what if arv[1] does not exist?
-    //      PLACE A COMMENT BLOCK HERE EXPLAINING
+    /*
+    *   The amount of arguments in argv is always one more than argc as there will always be a 
+    *   null at the end of argv. Since, the name of the executable is the first argument in argv and
+    *   always will be there will always be a value in argv at locations 0 and 1.
+    */
     if ((argc < 2) || (*argv[1] != '-')){
         usage(argv[0]);
         exit(1);
@@ -66,7 +70,10 @@ int main(int argc, char *argv[]){
     //WE NOW WILL HANDLE THE REQUIRED OPERATIONS
 
     //TODO:  #2 Document the purpose of the if statement below
-    //      PLACE A COMMENT BLOCK HERE EXPLAINING
+    /*
+    *   The purpose of the if statement below is to catch if a user of the program correctly
+    *   puts the flag in but forgets to put the "sample string"
+    */
     if (argc < 3){
         usage(argv[0]);
         exit(1);
@@ -78,6 +85,11 @@ int main(int argc, char *argv[]){
     //          handle error if malloc fails by exiting with a 
     //          return code of 99
     // CODE GOES HERE FOR #3
+    buff = malloc(BUFFER_SZ);
+    if (!buff) {
+        printf("Error allocating buffer memory");
+        exit(99);
+    }
 
 
     user_str_len = setup_buff(buff, input_string, BUFFER_SZ);     //see todos
