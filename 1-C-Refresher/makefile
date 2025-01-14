@@ -3,13 +3,13 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g
 
 # Target executable name
-TARGET = stringfun
+TARGET = stringFun
 
 # Default target
 all: $(TARGET)
 
 # Compile source to executable
-$(TARGET): stringfun.c
+$(TARGET): stringFun.c
 	$(CC) $(CFLAGS) -o $(TARGET) $^
 
 # Clean up build files
