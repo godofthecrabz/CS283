@@ -70,7 +70,15 @@ void usage(char *exename){
 
 int count_words(char *buff, int len, int str_len){
     //YOU MUST IMPLEMENT
-    return 0;
+    int words = 0;
+    for (int i = 0; i < len; i++) {
+        if (*buff == '.')
+            return words;
+        if (*buff == ' ')
+            words++;
+        buff++;
+    }
+    return words;
 }
 
 //ADD OTHER HELPER FUNCTIONS HERE FOR OTHER REQUIRED PROGRAM OPTIONS
@@ -145,6 +153,12 @@ int main(int argc, char *argv[]){
 
         //TODO:  #5 Implement the other cases for 'r' and 'w' by extending
         //       the case statement options
+        case 'r':
+            break;
+        case 'w':
+            break;
+        case 'x':
+            break;
         default:
             usage(argv[0]);
             exit(1);
