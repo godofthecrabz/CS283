@@ -65,7 +65,6 @@ void print_buff(char *buff, int len){
 
 void usage(char *exename){
     printf("usage: %s [-h|c|r|w|x] \"string\" [other args]\n", exename);
-
 }
 
 int count_words(char *buff, int len, int str_len){
@@ -73,7 +72,7 @@ int count_words(char *buff, int len, int str_len){
     int words = 0;
     for (int i = 0; i < len; i++) {
         if (*buff == '.')
-            return words;
+            return ++words;
         if (*buff == ' ')
             words++;
         buff++;
@@ -166,6 +165,7 @@ int main(int argc, char *argv[]){
 
     //TODO:  #6 Dont forget to free your buffer before exiting
     print_buff(buff,BUFFER_SZ);
+    free(buff);
     exit(0);
 }
 
