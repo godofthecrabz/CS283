@@ -13,6 +13,8 @@ int  setup_buff(char *, char *, int);
 //prototypes for functions to handle required functionality
 int  count_words(char *, int, int);
 //add additional prototypes here
+void reverse(char *, int);
+void wordPrint(char *, int);
 
 
 int setup_buff(char *buff, char *user_str, int len){
@@ -81,6 +83,12 @@ int count_words(char *buff, int len, int str_len){
 }
 
 //ADD OTHER HELPER FUNCTIONS HERE FOR OTHER REQUIRED PROGRAM OPTIONS
+void reverse(char *buff, int len) {
+    char temp;
+}
+
+void wordPrint(char *buff, int len) {
+}
 
 int main(int argc, char *argv[]){
 
