@@ -33,9 +33,9 @@ int setup_buff(char *buff, char *user_str, int len){
             if (whitespace == 0) {
                 *buff = ' ';
                 buff++;
-                strLen++;
             }
             whitespace++;
+            strLen++;
             user_str++;
             continue;
         }
@@ -84,7 +84,21 @@ int count_words(char *buff, int len, int str_len){
 
 //ADD OTHER HELPER FUNCTIONS HERE FOR OTHER REQUIRED PROGRAM OPTIONS
 void reverse(char *buff, int len) {
+    int start = 0, last;
     char temp;
+    for (int i = 0; i < len; i++) {
+        if (*(buff + i) == '.') {
+            last = i - 1;
+            break;
+        }
+    }
+    while (start < last) {
+        temp = *(buff + start);
+        *(buff + start) = *(buff + last);
+        *(buff + last) = temp;
+        start++;
+        last--;
+    }
 }
 
 void wordPrint(char *buff, int len) {
@@ -161,6 +175,14 @@ int main(int argc, char *argv[]){
         //TODO:  #5 Implement the other cases for 'r' and 'w' by extending
         //       the case statement options
         case 'r':
+            reverse(buff, BUFFER_SZ);
+            printf("Reversed String: ");
+            char* temp = buff;
+            while (*temp != '.') {
+                putchar(*temp);
+                temp++;
+            }
+            putchar('\n');
             break;
         case 'w':
             break;
