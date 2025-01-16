@@ -102,6 +102,17 @@ void reverse(char *buff, int len) {
 }
 
 void wordPrint(char *buff, int len) {
+    int count = 0;
+    while (*buff != '.') {
+        if (*buff == ' ') {
+            //print word and count
+            count = 0;
+            buff++;
+            continue;
+        }
+        count++;
+        buff++;
+    }
 }
 
 int main(int argc, char *argv[]){
