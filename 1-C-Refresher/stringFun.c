@@ -15,6 +15,7 @@ int  count_words(char *, int, int);
 //add additional prototypes here
 void reverse(char *, int);
 void wordPrint(char *, int);
+void searchAndReplace(char *, int, char *, char *);
 
 
 int setup_buff(char *buff, char *user_str, int len){
@@ -102,17 +103,26 @@ void reverse(char *buff, int len) {
 }
 
 void wordPrint(char *buff, int len) {
-    int count = 0;
+    printf("Word Print\n----------\n");
+    int charCount = 0;
+    int wordCount = 1;
+    printf("%d. ", wordCount);
     while (*buff != '.') {
         if (*buff == ' ') {
             //print word and count
-            count = 0;
+            printf(" (%d)\n%d. ", charCount, ++wordCount);
+            charCount = 0;
             buff++;
             continue;
         }
-        count++;
+        putchar(*buff);
+        charCount++;
         buff++;
     }
+    printf(" (%d)\n", charCount);
+}
+
+void searchAndReplace(char *buff, int len, char *old, char *new) {
 }
 
 int main(int argc, char *argv[]){
@@ -196,8 +206,13 @@ int main(int argc, char *argv[]){
             putchar('\n');
             break;
         case 'w':
+            wordPrint(buff, BUFFER_SZ);
             break;
         case 'x':
+            if (argc < 5) {
+                usage(argv[0]);
+                exit(1);
+            }
             break;
         default:
             usage(argv[0]);
