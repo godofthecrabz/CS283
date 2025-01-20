@@ -123,6 +123,33 @@ void wordPrint(char *buff, int len) {
 }
 
 void searchAndReplace(char *buff, int len, char *old, char *new) {
+    int start = 0, end = 0, oldSize = 0;
+    char localBuff[BUFFER_SZ];
+    char *temp = old;
+    while (*temp) {
+        oldSize++;
+        temp++;
+    }
+    for (int i = 0; i < len; i++) {
+        if (*(buff + i) == ' ' || *(buff + i) == '.') {
+            temp = buff + start;
+            if (oldSize == i - start && memcmp(temp, old, oldSize) == 0) {
+                temp = new;
+                while (*temp) {
+                    *(localBuff + start) = *temp;
+                    start++;
+                    temp++;
+                }
+                end = start;
+                start++;
+            } else {
+                start = i + 1;
+            }
+        }
+        *(localBuff + end) = *(buff + i);
+        end++;
+    }
+    memcpy(buff, localBuff, BUFFER_SZ);
 }
 
 int main(int argc, char *argv[]){
@@ -183,6 +210,8 @@ int main(int argc, char *argv[]){
         exit(2);
     }
 
+    char* temp;
+    int count = 0;
     switch (opt){
         case 'c':
             rc = count_words(buff, BUFFER_SZ, user_str_len);  //you need to implement
@@ -198,10 +227,11 @@ int main(int argc, char *argv[]){
         case 'r':
             reverse(buff, BUFFER_SZ);
             printf("Reversed String: ");
-            char* temp = buff;
-            while (*temp != '.') {
+            temp = buff;
+            while (*temp != '.' && count < BUFFER_SZ) {
                 putchar(*temp);
                 temp++;
+                count++;
             }
             putchar('\n');
             break;
@@ -213,6 +243,15 @@ int main(int argc, char *argv[]){
                 usage(argv[0]);
                 exit(1);
             }
+            searchAndReplace(buff, BUFFER_SZ, argv[3], argv[4]);
+            printf("Modified String: ");
+            temp = buff;
+            while (*temp != '.' && count < BUFFER_SZ) {
+                putchar(*temp);
+                temp++;
+                count++;
+            }
+            putchar('\n');
             break;
         default:
             usage(argv[0]);
@@ -231,4 +270,9 @@ int main(int argc, char *argv[]){
 //          is a good practice, after all we know from main() that 
 //          the buff variable will have exactly 50 bytes?
 //  
-//          PLACE YOUR ANSWER HERE
+/*
+*   It is generally a good practice to provide the buffer length along with the buffer
+*   because most arrays will not be a preknown fixed size. If the functions we had to write
+*   did not take in the length of the array as an argument then the code would only work for
+*   our exact buffer size.
+*/
