@@ -59,6 +59,10 @@ int open_db(char *dbFile, bool should_truncate){
  *  console:  Does not produce any console I/O used by other functions
  */
 int get_student(int fd, int id, student_t *s){
+    int offset = id * sizeof(student_t);
+
+    lseek(fd, offset, SEEK_SET);
+    int readBytes = read(fd, s, STUDENT_RECORD_SIZE);
     return NOT_IMPLEMENTED_YET;
 }
 
