@@ -59,11 +59,17 @@ int open_db(char *dbFile, bool should_truncate){
  *  console:  Does not produce any console I/O used by other functions
  */
 int get_student(int fd, int id, student_t *s){
-    int offset = id * sizeof(student_t);
+    int offset = id * STUDENT_RECORD_SIZE;
 
     lseek(fd, offset, SEEK_SET);
     int readBytes = read(fd, s, STUDENT_RECORD_SIZE);
-    return NOT_IMPLEMENTED_YET;
+    if (readBytes != STUDENT_RECORD_SIZE) {
+        return ERR_DB_FILE;
+    }
+    if (memcmp(s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) == 0) {
+        return SRCH_NOT_FOUND;
+    }
+    return NO_ERROR;
 }
 
 /*
@@ -92,8 +98,42 @@ int get_student(int fd, int id, student_t *s){
  *            
  */
 int add_student(int fd, int id, char *fname, char *lname, int gpa){
-    printf(M_NOT_IMPL);
-    return NOT_IMPLEMENTED_YET;
+    int offset = id * STUDENT_RECORD_SIZE;
+    student_t s = EMPTY_STUDENT_RECORD;
+
+    lseek(fd, offset, SEEK_SET);
+    int readBytes = read(fd, &s, STUDENT_RECORD_SIZE);
+    if (readBytes != STUDENT_RECORD_SIZE) {
+        printf(M_ERR_DB_READ);
+        return ERR_DB_FILE;
+    }
+    if (memcmp(&s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) {
+        printf(M_ERR_DB_ADD_DUP, id);
+        return ERR_DB_OP;
+    }
+
+    s.id = id;
+    s.gpa = gpa;
+    int i;
+    for (i = 0; *fname && i < 24; i++) {
+        s.fname[i] = *fname;
+        fname++;
+    }
+    s.fname[i] = *fname;
+    for (i = 0; *lname && i < 32; i++) {
+        s.lname[i] = *lname;
+        lname++;
+    }
+    s.lname[i] = *lname;
+
+    lseek(fd, offset, SEEK_SET);
+    int writtenBytes = write(fd, &s, STUDENT_RECORD_SIZE);
+    if (writtenBytes != STUDENT_RECORD_SIZE) {
+        printf(M_ERR_DB_WRITE);
+        return ERR_DB_FILE;
+    }
+    printf(M_STD_ADDED, id);
+    return NO_ERROR;
 }
 
 /*
@@ -119,8 +159,19 @@ int add_student(int fd, int id, char *fname, char *lname, int gpa){
  *            
  */
 int del_student(int fd, int id){
-    printf(M_NOT_IMPL);
-    return NOT_IMPLEMENTED_YET;
+    int offset = id * STUDENT_RECORD_SIZE;
+    student_t s = EMPTY_STUDENT_RECORD;
+
+    int code = get_student(fd, id, &s);
+
+    switch (code) {
+        case ERR_DB_FILE:
+            break;
+        case SRCH_NOT_FOUND:
+            break;
+        //case 
+    }
+    return NO_ERROR;
 }
 
 /*
