@@ -103,13 +103,15 @@ int add_student(int fd, int id, char *fname, char *lname, int gpa){
 
     lseek(fd, offset, SEEK_SET);
     int readBytes = read(fd, &s, STUDENT_RECORD_SIZE);
-    if (readBytes != STUDENT_RECORD_SIZE) {
-        printf(M_ERR_DB_READ);
-        return ERR_DB_FILE;
-    }
-    if (memcmp(&s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) {
-        printf(M_ERR_DB_ADD_DUP, id);
-        return ERR_DB_OP;
+    if (readBytes != 0) {
+        if (readBytes != STUDENT_RECORD_SIZE) {
+            printf(M_ERR_DB_READ);
+            return ERR_DB_FILE;
+        }
+        if (memcmp(&s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) {
+            printf(M_ERR_DB_ADD_DUP, id);
+            return ERR_DB_OP;
+        }
     }
 
     s.id = id;
@@ -166,12 +168,21 @@ int del_student(int fd, int id){
 
     switch (code) {
         case ERR_DB_FILE:
-            break;
+            printf(M_ERR_DB_READ);
+            return ERR_DB_FILE;
         case SRCH_NOT_FOUND:
-            break;
-        //case 
+            printf(M_STD_NOT_FND_MSG, id);
+            return ERR_DB_OP;
+        case NO_ERROR:
+            lseek(fd, offset, SEEK_SET);
+            int writtenBytes = write(fd, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE);
+            if (writtenBytes != STUDENT_RECORD_SIZE) {
+                printf(M_ERR_DB_WRITE);
+                return ERR_DB_FILE;
+            }
+            printf(M_STD_DEL_MSG, id);
+            return NO_ERROR;
     }
-    return NO_ERROR;
 }
 
 /*
@@ -199,8 +210,26 @@ int del_student(int fd, int id){
  *            
  */
 int count_db_records(int fd){
-    printf(M_NOT_IMPL);
-    return NOT_IMPLEMENTED_YET;
+    int counter = 0;
+    int result;
+    student_t s = EMPTY_STUDENT_RECORD;
+    lseek(fd, STUDENT_RECORD_SIZE, SEEK_SET);
+    
+    while ((result = read(fd, &s, STUDENT_RECORD_SIZE))) {
+        if (result != STUDENT_RECORD_SIZE) {
+            printf(M_ERR_DB_READ);
+            return ERR_DB_FILE;
+        }
+        if (memcmp(&s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) {
+            counter++;
+        }
+    }
+    if (counter) {
+        printf(M_DB_RECORD_CNT, counter);
+    } else {
+        printf(M_DB_EMPTY);
+    }
+    return counter;
 }
 
 /*
@@ -237,8 +266,30 @@ int count_db_records(int fd){
  *            
  */
 int print_db(int fd){
-    printf(M_NOT_IMPL);
-    return NOT_IMPLEMENTED_YET;
+    int result;
+    float gpa;
+    int hasEntries = 0;
+    student_t s = EMPTY_STUDENT_RECORD;
+    lseek(fd, STUDENT_RECORD_SIZE, SEEK_SET);
+
+    while ((result = read(fd, &s, STUDENT_RECORD_SIZE))) {
+        if (result != STUDENT_RECORD_SIZE) {
+            printf(M_ERR_DB_READ);
+            return ERR_DB_FILE;
+        }
+        if (memcmp(&s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) {
+            if (!hasEntries) {
+                printf(STUDENT_PRINT_HDR_STRING, "ID", "FIRST NAME", "LAST_NAME", "GPA");
+            }
+            gpa = s.gpa / 100.0;
+            printf(STUDENT_PRINT_FMT_STRING, s.id, s.fname, s.lname, gpa);
+            hasEntries++;
+        }
+    }
+    if (!hasEntries) {
+        printf(M_DB_EMPTY);
+    }
+    return NO_ERROR;
 }
 
 /*
@@ -270,7 +321,13 @@ int print_db(int fd){
  *            
  */
 void print_student(student_t *s){
-    printf(M_NOT_IMPL);
+    if (!s || !s->id) {
+        printf(M_ERR_STD_PRINT);
+        return;
+    }
+    float gpa = s->gpa / 100.0;
+    printf(STUDENT_PRINT_HDR_STRING, "ID", "FIRST NAME", "LAST_NAME", "GPA");
+    printf(STUDENT_PRINT_FMT_STRING, s->id, s->fname, s->lname, gpa);
 }
 
 /*
