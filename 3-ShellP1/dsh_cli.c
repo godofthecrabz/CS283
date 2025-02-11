@@ -46,9 +46,21 @@
  */
 int main()
 {
-    char *cmd_buff;
+    char cmd_buff[SH_CMD_MAX];
     int rc = 0;
     command_list_t clist;
+
+    while (1) {
+        printf("%s", SH_PROMPT);
+        if (fgets(cmd_buff, ARG_MAX, stdin) == NULL) {
+            printf("\n");
+            continue;
+        }
+        cmd_buff[strcspn(cmd_buff,"\n")] = '\0';
+        if (strcmp(cmd_buff, "exit") == 0) {
+            exit(OK);
+        }
+    }
 
     printf(M_NOT_IMPL);
     exit(EXIT_NOT_IMPL);
