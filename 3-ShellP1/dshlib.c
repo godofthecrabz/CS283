@@ -34,6 +34,52 @@
  */
 int build_cmd_list(char *cmd_line, command_list_t *clist)
 {
-    printf(M_NOT_IMPL);
-    return EXIT_NOT_IMPL;
+    int cmdCount = 0;
+
+    char *tok = strtok(cmd_line, PIPE_STRING);
+    while (tok) {
+        int exeLen = 0;
+        int argLen = 0;
+        int wroteExe = 0;
+        int spaceLast = 1;
+
+        while (*tok) {
+            if (cmdCount == CMD_MAX) {
+                return ERR_TOO_MANY_COMMANDS;
+            }
+            if (*tok == SPACE_CHAR) {
+                if (!spaceLast) {
+                    if (wroteExe) {
+                        clist->commands[cmdCount].args[argLen] = SPACE_CHAR;
+                        argLen++;
+                    } else {
+                        clist->commands[cmdCount].exe[exeLen] = '\0';
+                        wroteExe = 1;
+                    }
+                }
+                spaceLast = 1;
+            } else {
+                if (wroteExe) {
+                    if (exeLen == EXE_MAX - 1) {
+                        return ERR_CMD_OR_ARGS_TOO_BIG;
+                    }
+                    clist->commands[cmdCount].args[argLen] = *tok;
+                    argLen++;
+                } else {
+                    if (argLen == ARG_MAX - 1) {
+                        return ERR_CMD_OR_ARGS_TOO_BIG;
+                    }
+                    clist->commands[cmdCount].exe[exeLen] = *tok;
+                    exeLen++;
+                }
+                spaceLast = 0;
+            }
+            tok++;
+        }
+        clist->commands[cmdCount].args[argLen] = '\0';
+        cmdCount++;
+        tok = strtok(NULL, PIPE_STRING);
+    }
+    clist->num = cmdCount;
+    return OK;
 }

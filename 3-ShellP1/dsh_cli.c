@@ -46,9 +46,10 @@
  */
 int main()
 {
+    //char *cmd_buff = malloc(sizeof(char) * SH_CMD_MAX);
     char cmd_buff[SH_CMD_MAX];
     int rc = 0;
-    command_list_t clist;
+    command_list_t clist = {0};
 
     while (1) {
         printf("%s", SH_PROMPT);
@@ -57,11 +58,38 @@ int main()
             continue;
         }
         cmd_buff[strcspn(cmd_buff,"\n")] = '\0';
-        if (strcmp(cmd_buff, "exit") == 0) {
-            exit(OK);
+        if (strcmp(cmd_buff, EXIT_CMD) == 0) {
+            break;
+        } else if (strcmp(cmd_buff, "") == 0) {
+            printf(CMD_WARN_NO_CMD);
+        } else if (strcmp(cmd_buff, "dragon") == 0) {
+            printf("not implemented yet\n");
+        } else {
+            rc = build_cmd_list(cmd_buff, &clist);
+            switch (rc) {
+                case OK:
+                    printf(CMD_OK_HEADER, clist.num);
+                    for (int i = 0; i < clist.num; i++) {
+                        if (clist.commands[i].args[0]) {
+                            printf("<%d> %s [%s]\n", i + 1, clist.commands[i].exe, clist.commands[i].args);
+                        } else {
+                            printf("<%d> %s\n", i + 1, clist.commands[i].exe);
+                        }
+                    }
+                    break;
+                case ERR_TOO_MANY_COMMANDS:
+                    printf(CMD_ERR_PIPE_LIMIT, CMD_MAX);
+                    break;
+                case ERR_CMD_OR_ARGS_TOO_BIG:
+                    printf("error: executable name or arguments are too long\n");
+                    break;
+                default:
+                    printf("SHOULD NOT REACH HERE\n");
+                    break;
+            }
         }
     }
 
-    printf(M_NOT_IMPL);
-    exit(EXIT_NOT_IMPL);
+    //free(cmd_buff);
+    exit(OK);
 }

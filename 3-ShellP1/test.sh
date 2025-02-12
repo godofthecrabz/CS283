@@ -189,6 +189,7 @@ cmd1
 cmd2 arg arg2
 p1 | p2
 p3 p3a1 p3a2 | p4 p4a1 p4a2
+exit
 EOF
 
     # Strip all whitespace (spaces, tabs, newlines) from the output
