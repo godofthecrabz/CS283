@@ -4,12 +4,12 @@
 
 2. You needed to use `malloc()` to allocte memory for `cmd_buff` in `dsh_cli.c`. Can you explain why you needed to do that, instead of allocating a fixed-size array?
 
-    > **Answer**:  _start here_
+    > **Answer**:  When the shell passes the arguments string array to a newly created application it will reuse the same input string provided to it. If the string was a fized-size array a program launching the shell might see their arguments change if the shell begins reading a new line while the program executes. By using `malloc()`, we can ensure there exists one argument string for each program launched from the shell.
 
 
-3. In `dshlib.c`, the function `build_cmd_list(`)` must trim leading and trailing spaces from each command before storing it. Why is this necessary? If we didn't trim spaces, what kind of issues might arise when executing commands in our shell?
+3. In `dshlib.c`, the function `build_cmd_list()` must trim leading and trailing spaces from each command before storing it. Why is this necessary? If we didn't trim spaces, what kind of issues might arise when executing commands in our shell?
 
-    > **Answer**:  _start here_
+    > **Answer**:  The commands are meant to be used as the names and arguments for another program for the shell to execute. If the leading and trailing spaces were included it would make it much hard to pass the command string to another program as arguements. If the spaces weren't removed it could make it impossible to execute the program, because the program name would have the leading spaces, and the last argument would have the garbage spaces at the end that could mess up the program behavior.
 
 4. For this question you need to do some research on STDIN, STDOUT, and STDERR in Linux. We've learned this week that shells are "robust brokers of input and output". Google _"linux shell stdin stdout stderr explained"_ to get started.
 
