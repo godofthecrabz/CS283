@@ -60,13 +60,13 @@ int build_cmd_list(char *cmd_line, command_list_t *clist)
                 spaceLast = 1;
             } else {
                 if (wroteExe) {
-                    if (exeLen == EXE_MAX - 1) {
+                    if (argLen >= ARG_MAX - 1) {
                         return ERR_CMD_OR_ARGS_TOO_BIG;
                     }
                     clist->commands[cmdCount].args[argLen] = *tok;
                     argLen++;
                 } else {
-                    if (argLen == ARG_MAX - 1) {
+                    if (exeLen >= EXE_MAX - 1) {
                         return ERR_CMD_OR_ARGS_TOO_BIG;
                     }
                     clist->commands[cmdCount].exe[exeLen] = *tok;

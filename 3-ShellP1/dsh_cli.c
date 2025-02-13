@@ -46,8 +46,7 @@
  */
 int main()
 {
-    //char *cmd_buff = malloc(sizeof(char) * SH_CMD_MAX);
-    char cmd_buff[SH_CMD_MAX];
+    char *cmd_buff = malloc(sizeof(char) * SH_CMD_MAX);
     int rc = 0;
     command_list_t clist = {0};
 
@@ -90,6 +89,6 @@ int main()
         }
     }
 
-    //free(cmd_buff);
+    free(cmd_buff);
     exit(OK);
 }
