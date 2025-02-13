@@ -15,16 +15,16 @@
 
 - One topic you should have found information on is "redirection". Please provide at least 3 redirection examples that we should implement in our custom shell, and explain what challenges we might have implementing them.
 
-    > **Answer**:  _start here_
+    > **Answer**:  The Drexel Shell should implement redirection of STDIN, STDOUT, and STDERR. The challenges that come from redirection of standard input and output mainly are the redirecting output from a program to replace STDIN and the redirecting of the program output to another program. Temporary files would have to be created for passing the information between the two programs.
 
 - You should have also learned about "pipes". Redirection and piping both involve controlling input and output in the shell, but they serve different purposes. Explain the key differences between redirection and piping.
 
-    > **Answer**:  _start here_
+    > **Answer**:  The key difference between redirection and piping is that redirection passes data to files and streams while piping passes data to other programs. 
 
 - STDERR is often used for error messages, while STDOUT is for regular output. Why is it important to keep these separate in a shell?
 
-    > **Answer**:  _start here_
+    > **Answer**:  Since STDERR is seperate output stream a programmer can ensure their is a safe place for debugging and error output to go in case the STDOUT is redirected to another file or stream. 
 
 - How should our custom shell handle errors from commands that fail? Consider cases where a command outputs both STDOUT and STDERR. Should we provide a way to merge them, and if so, how?
 
-    > **Answer**:  _start here_
+    > **Answer**:  The Drexel Shell should print out any output from the failed command to the shell. The shell should merge the output from STDOUT and STDERR either by coloring the output from the two streams differently, i.e. color STDOUT white and STDERR red, or labelling each line with which output stream it came from.
