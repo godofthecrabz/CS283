@@ -184,7 +184,20 @@ int build_cmd_buff(char *cmd_line, cmd_buff_t *cmd_buff) {
 }
 
 Built_In_Cmds match_command(const char *input) {
+    if (strcmp(input, EXIT_CMD) == 0) {
+        return BI_CMD_EXIT;
+    } else if (strcmp(input, "dragon") == 0) {
+        return BI_CMD_DRAGON;
+    } else if (strcmp(input, "cd") == 0) {
+        return BI_CMD_CD;
+    } else if (strcmp(input, "rc") == 0) {
+        return BI_RC;
+    } else if (strcmp(input, "") == 0) {
+    }
 }
 
 Built_In_Cmds exec_built_in_cmd(cmd_buff_t *cmd) {
+}
+
+int exec_cmd(cmd_buff_t *cmd) {
 }
