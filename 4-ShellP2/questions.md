@@ -30,12 +30,12 @@
 
 - What is the purpose of signals in a Linux system, and how do they differ from other forms of interprocess communication (IPC)?
 
-    > **Answer**:  _start here_
+    > **Answer**:  The purpose of signals is to allow for processes/threads to communicate with the operating system. Signals differ from other forms of interprocess communication because the communications between the process and the operating system are of a predefined set that all have specific meanings.
 
 - Find and describe three commonly used signals (e.g., SIGKILL, SIGTERM, SIGINT). What are their typical use cases?
 
-    > **Answer**:  _start here_
+    > **Answer**:  SIGINT notifies a process that it needs to suspend execution and prepare for termination. SIGINT is commonly used for terminating a process that fails to terminate properly. SIGKILL notifies the operating system to terminate a process. SIGKILL is used to quickly terminate an erroneous or unresponsive process. SIGTERM notifies the operating system to terminate a process. Unlike SIGKILL, SIGTERM gives the terminating process time to properly clean itself up while SIGKILL immiediately terminates the program.
 
 - What happens when a process receives SIGSTOP? Can it be caught or ignored like SIGINT? Why or why not?
 
-    > **Answer**:  _start here_
+    > **Answer**: SIGSTOP tells a process to stop executing until it receives a SIGCONT signal to resume execution. SIGSTOP cannot be caught or ignored because the operating system needs some way to stop or suspend an unresponsive program without it being ignored. SIGSTOP and SIGKILL both are meant with the purpose of allowing suspension or termination of a program no matter what.
