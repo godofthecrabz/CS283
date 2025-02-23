@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include "dshlib.h"
+#include <errno.h>
 
 
 extern void print_dragon();
@@ -76,8 +77,7 @@ int exec_local_cmd_loop()
     while (!shouldExit) {
         printf("%s", SH_PROMPT);
         if (fgets(cmd_buff, ARG_MAX, stdin) == NULL) {
-            printf("\n");
-            continue;
+            break;
         }
         cmd_buff[strcspn(cmd_buff,"\n")] = '\0';
 
@@ -166,8 +166,8 @@ int build_cmd_buff(char *cmd_line, cmd_buff_t *cmd_buff) {
             if (cmdCount == CMD_MAX) {
                 return ERR_TOO_MANY_COMMANDS;
             }
-            if (*tok == SPACE_CHAR) {
-                if (!spaceLast && !includeSpace) {
+            if (*tok == SPACE_CHAR && !includeSpace) {
+                if (!spaceLast) {
                     cmd_buff->_cmd_buffer[cmdLen] = '\0';
                     cmd_buff->argv[argCount] = cmd_buff->_cmd_buffer + start;
                     cmdLen++;
@@ -179,7 +179,8 @@ int build_cmd_buff(char *cmd_line, cmd_buff_t *cmd_buff) {
                 if (cmdLen >= SH_CMD_MAX - 1) {
                     return ERR_CMD_OR_ARGS_TOO_BIG;
                 }
-                if (*tok == '"') {
+                if (*tok == '\"') {
+                    if (spaceLast) start++;
                     includeSpace = !includeSpace;
                 } else {
                     cmd_buff->_cmd_buffer[cmdLen] = *tok;
@@ -252,15 +253,45 @@ int exec_cmd(cmd_buff_t *cmd) {
     if (f_result == 0) {
         int rc = execvp(cmd->argv[0], cmd->argv);
         if (rc < 0) {
-            perror("fork error");
-            exit(ERR_EXEC_CMD);
+            int err = errno;
+            switch (err) {
+                case EPERM:
+                    printf("Operation not permitted\n");
+                    break;
+                case ENOENT:
+                    printf("Command not found\n");
+                    break;
+                case EIO:
+                    printf("Error reading file");
+                    break;
+                case EACCES:
+                    printf("Access to command denied\n");
+                    break;
+                case EBADF:
+                    printf("Bad file number for command\n");
+                    break;
+                case ENFILE:
+                    printf("File table full\n");
+                    break;
+                case EMFILE:
+                    printf("Too many files open to load command\n");
+                    break;
+                case EFBIG:
+                    printf("Command file too large\n");
+                    break;
+                default:
+                    printf("Unrecognized error: %d\n", err);
+                    break;
+            } 
+            exit(err);
         }
+        return 0;
     } else {
         int rc = wait(&c_result);
         if (rc < f_result) {
             perror("fork error");
             exit(ERR_EXEC_CMD);
         }
-        return c_result;
+        return WEXITSTATUS(c_result);
     }
 }
