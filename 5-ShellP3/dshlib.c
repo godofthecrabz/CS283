@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 #include "dshlib.h"
@@ -74,7 +75,9 @@ int exec_local_cmd_loop()
 
         switch (rc) {
             case OK:
-                if (cmds.num > 1) {
+                if (cmds.num == 0) {
+                    printf(CMD_WARN_NO_CMD);
+                } else if (cmds.num > 1) {
                     int null_fd = open("/dev/null", O_WRONLY);
                     if (null_fd == -1) {
                         perror("open");
@@ -269,6 +272,43 @@ Built_In_Cmds exec_built_in_cmd(cmd_buff_t *cmd) {
 
 int exec_cmd(cmd_buff_t *cmd) {
     int f_result, c_result;
+    int inFD = -2, outFD = -2;
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+
+    for (int i = 0; i < cmd->argc; i++) {
+        if (strcmp(cmd->argv[i], "<") == 0) {
+            if (i + 1 == cmd->argc || !cmd->argv[i + 1]) {
+                printf("error: No file name provided for redirection\n");
+                return ERR_CMD_ARGS_BAD;
+            }
+            cmd->argv[i] = NULL;
+            inFD = open(cmd->argv[i + 1], O_RDONLY, mode);
+        } else if (strcmp(cmd->argv[i], ">") == 0) {
+            if (i + 1 == cmd->argc || !cmd->argv[i + 1]) {
+                printf("error: No file name provided for redirection\n");
+                return ERR_CMD_ARGS_BAD;
+            }
+            cmd->argv[i] = NULL;
+            outFD = open(cmd->argv[i + 1], O_WRONLY | O_CREAT, mode);
+        } else if (strcmp(cmd->argv[i], ">>") == 0) {
+            if (i + 1 == cmd->argc || !cmd->argv[i + 1]) {
+                printf("error: No file name provided for redirection\n");
+                return ERR_CMD_ARGS_BAD;
+            }
+            cmd->argv[i] = NULL;
+            outFD = open(cmd->argv[i + 1], O_WRONLY | O_CREAT | O_APPEND, mode);
+        }
+    }
+
+    if (inFD == -1) {
+        printf("error: opening file for redirection\n");
+        return ERR_EXEC_CMD;
+    }
+
+    if (outFD == -1) {
+        printf("error: opening file for redirection\n");
+        return ERR_EXEC_CMD;
+    }
 
     f_result = fork();
     if (f_result < 0) {
@@ -277,6 +317,14 @@ int exec_cmd(cmd_buff_t *cmd) {
     }
 
     if (f_result == 0) {
+        if (inFD != -2) {
+            dup2(inFD, STDIN_FILENO);
+            close(inFD);
+        }
+        if (outFD != -2) {
+            dup2(outFD, STDOUT_FILENO);
+            close(outFD);
+        }
         int rc = execvp(cmd->argv[0], cmd->argv);
         if (rc < 0) {
             int err = errno;
@@ -313,6 +361,12 @@ int exec_cmd(cmd_buff_t *cmd) {
         }
         return 0;
     } 
+    if (inFD != -2) {
+        close(inFD);
+    }
+    if (outFD != -2) {
+        close(outFD);
+    }
     int rc = wait(&c_result);
     if (rc < f_result) {
         perror("fork error");
