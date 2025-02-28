@@ -65,6 +65,7 @@ int exec_local_cmd_loop()
     while (!shouldExit) {
         printf("%s", SH_PROMPT);
         if (fgets(cmd_buff, ARG_MAX, stdin) == NULL) {
+            printf("\n");
             break;
         }
         cmd_buff[strcspn(cmd_buff,"\n")] = '\0';
@@ -74,6 +75,11 @@ int exec_local_cmd_loop()
         switch (rc) {
             case OK:
                 if (cmds.num > 1) {
+                    int null_fd = open("/dev/null", O_WRONLY);
+                    if (null_fd == -1) {
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                    }
                     pid_t supervisor = fork();
                     if (supervisor == -1) {
                         perror("fork supervisor");
@@ -82,9 +88,12 @@ int exec_local_cmd_loop()
 
                     if (supervisor == 0) {  // Supervisor process
                         execute_pipeline(&cmds);
+                        dup2(null_fd, STDOUT_FILENO);
+                        close(null_fd);
                         exit(EXIT_SUCCESS);
                     }
 
+                    close(null_fd);
                     waitpid(supervisor, NULL, 0);
                 } else {
                     Built_In_Cmds ret = exec_built_in_cmd(&cmds.commands[0]);
@@ -92,6 +101,7 @@ int exec_local_cmd_loop()
                         case BI_EXECUTED:
                             break;
                         case BI_CMD_EXIT:
+                            printf("exiting...\n");
                             shouldExit = true;
                             break;
                         case BI_NOT_BI:
@@ -160,7 +170,6 @@ int build_cmd_buff(char *cmd_line, cmd_buff_t *cmd_buff) {
             if (!spaceLast) {
                 cmd_buff->_cmd_buffer[cmdLen] = '\0';
                 cmd_buff->argv[argCount] = cmd_buff->_cmd_buffer + start;
-                printf("%s\n", cmd_buff->argv[argCount]);
                 cmdLen++;
                 argCount++;
                 start = cmdLen;
@@ -181,12 +190,12 @@ int build_cmd_buff(char *cmd_line, cmd_buff_t *cmd_buff) {
         }
         cmd_line++;
     }
-    cmd_buff->_cmd_buffer[cmdLen] = '\0';
-    cmd_buff->argv[argCount] = cmd_buff->_cmd_buffer + start;
-    printf("%s\n", cmd_buff->argv[argCount]);
-    argCount++;
-    cmd_buff->argc = argCount;
-    printf("Command Length in Function: %d\n", cmd_buff->argc);
+    if (!spaceLast) {
+        cmd_buff->_cmd_buffer[cmdLen] = '\0';
+        cmd_buff->argv[argCount] = cmd_buff->_cmd_buffer + start;
+        argCount++;
+        cmd_buff->argc = argCount;
+    }
     return OK;
 }
 
@@ -199,24 +208,17 @@ int build_cmd_list(char *cmd_line, command_list_t *clist) {
         if (cmdCount == CMD_MAX) {
             return ERR_TOO_MANY_COMMANDS;
         }
-        printf("%s\n", tok);
         alloc_cmd_buff(&clist->commands[cmdCount]);
         clear_cmd_buff(&clist->commands[cmdCount]);
         rc = build_cmd_buff(tok, &clist->commands[cmdCount]);
         if (rc == ERR_CMD_OR_ARGS_TOO_BIG) {
             return rc;
         }
-        printf("Processed Command: ");
-        printCommand(&clist->commands[cmdCount]);
-        printf("\n");
-        printf("Command Length: %d\n", clist->commands[cmdCount].argc);
         cmdCount++;
         tok = strtok(NULL, PIPE_STRING);
     }
     clist->num = cmdCount;
 
-    printf("Finished Building Command List\n");
-    printCommandList(clist);
     return OK;
 }
 
@@ -257,6 +259,7 @@ Built_In_Cmds exec_built_in_cmd(cmd_buff_t *cmd) {
         case BI_NOT_BI:
             return BI_NOT_BI;
         case BI_EXECUTED:
+            printf(CMD_WARN_NO_CMD);
             return BI_EXECUTED;
         default:
             printf("Error executing built in command\n");
@@ -329,10 +332,6 @@ int execute_pipeline(command_list_t *clist) {
             exit(EXIT_FAILURE);
         }
     }
-
-    printf("Printing Commands Before Execution\n");
-    printCommandList(clist);
-    printf("After Printing Commands Before Execution\n");
 
     // Create processes for each command
     for (int i = 0; i < clist->num; i++) {
