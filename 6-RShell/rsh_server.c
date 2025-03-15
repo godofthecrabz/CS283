@@ -215,11 +215,9 @@ int process_cli_requests(int svr_socket) {
         rc = exec_client_requests(cli_socket);
         switch (rc) {
             case OK:
-                send_message_string(cli_socket, EXIT_CMD);
                 stop_server(cli_socket);
                 break;
             case OK_EXIT:
-                send_message_string(cli_socket, EXIT_CMD);
                 shouldExit = 1;
                 break;
             case ERR_RDSH_COMMUNICATION:
@@ -303,15 +301,11 @@ int exec_client_requests(int cli_socket) {
         }
         // TODO rsh_execute_pipeline to run your cmd_list
         cmd_rc = rsh_execute_pipeline(cli_socket, &cmd_list);
-        send_message_eof(cli_socket);
         // TODO send appropriate respones with send_message_string
         // - error constants for failures
         // - buffer contents from execute commands
         //  - etc.
         switch (cmd_rc) {
-            case OK:
-                last_rc = cmd_rc;
-                break;
             case EXIT_SC:
                 send_message_string(cli_socket, RCMD_MSG_CLIENT_EXITED);
                 shouldStop = 1;
@@ -326,9 +320,13 @@ int exec_client_requests(int cli_socket) {
                 io_size = snprintf(io_buff, RDSH_COMM_BUFF_SZ, RCMD_MSG_SVR_RC_CMD, last_rc);
                 send_message_string(cli_socket, io_buff);
                 break;
+            default:
+                last_rc = cmd_rc;
+                break;
         }
 
         // TODO send_message_eof when done
+        send_message_eof(cli_socket);
     }
 
     free(io_buff);
@@ -384,7 +382,7 @@ int send_message_string(int cli_socket, char *buff) {
     if (send(cli_socket, buff, strlen(buff) + 1, 0) == -1) {
         return ERR_RDSH_COMMUNICATION;
     }
-    return send_message_eof(cli_socket);
+    return OK;
 }
 
 

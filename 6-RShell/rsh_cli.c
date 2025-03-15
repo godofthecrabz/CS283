@@ -111,6 +111,8 @@ int exec_remote_cmd_loop(char *address, int port)
 
     while (1) 
     {
+        memset(cmd_buff, 0, sizeof(char) * SH_CMD_MAX);
+        memset(rsp_buff, 0, RDSH_COMM_BUFF_SZ);
         // TODO print prompt
         printf("%s", SH_PROMPT);
         // TODO fgets input
@@ -155,7 +157,7 @@ int exec_remote_cmd_loop(char *address, int port)
             }
         }
         // TODO break on exit command
-        if (strcmp(rsp_buff + (io_size - 5), EXIT_CMD) == 0) {
+        if (strcmp(cmd_buff, EXIT_CMD) == 0 || strcmp(cmd_buff, "stop-server") == 0) {
             break;
         }
     }
