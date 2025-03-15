@@ -54,6 +54,10 @@ int start_server(char *ifaces, int port, int is_threaded) {
     //TODO:  If you are implementing the extra credit, please add logic
     //       to keep track of is_threaded to handle this feature
     //
+    if (is_threaded) {
+        printf("Multithreaded server not implemented\n");
+        return WARN_RDSH_NOT_IMPL;
+    }
 
     svr_socket = boot_server(ifaces, port);
     if (svr_socket < 0) {

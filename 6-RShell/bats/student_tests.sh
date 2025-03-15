@@ -279,3 +279,167 @@ EOF
     # Check exact match
     [ "$stripped_output" = "$expected_output" ]
 }
+
+@test "Client fails to open without server" {
+    run ./dsh -c <<EOF
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="Theserverisdown.startclient:Connectionrefusedsocketclientmode:addr:127.0.0.1:1234cmdloopreturned-52"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
+
+@test "Client with matching server port connects" {
+    command ./dsh -s -p 25655 &
+    run ./dsh -c -p 25655 << EOF
+stop-server
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="socketclientmode:addr:127.0.0.1:25655dsh4>clientrequestedservertostop,stopping...cmdloopreturned0"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
+
+@test "Client with mismatching server port fails to connect" {
+    command ./dsh -s -p 25655 &
+    run ./dsh -c -p 25654 << EOF
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="Theserverisdown.startclient:Connectionrefusedsocketclientmode:addr:127.0.0.1:25654cmdloopreturned-52"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
+
+@test "Single command in client-server mode" {
+    command ./dsh -s -p 25655 &
+    run ./dsh -c -p 25655 << EOF
+echo hello
+stop-server
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="socketclientmode:addr:127.0.0.1:25655dsh4>hellodsh4>clientrequestedservertostop,stopping...cmdloopreturned0"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
+
+@test "Change Directory in client-server mode" {
+    command ./dsh -s -p 25655 &
+    run ./dsh -c -p 25655 << EOF
+pwd
+cd ..
+pwd
+stop-server
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="socketclientmode:addr:127.0.0.1:25655dsh4>/home/cf838/CS283/CS283/6-RShelldsh4>dsh4>/home/cf838/CS283/CS283dsh4>clientrequestedservertostop,stopping...cmdloopreturned0"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
+
+@test "Client-Server pipe test" {
+    command ./dsh -s -p 25655 &
+    run ./dsh -c -p 25655 << EOF
+cat makefile | grep TARGET | wc -l
+stop-server
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="socketclientmode:addr:127.0.0.1:25655dsh4>7dsh4>clientrequestedservertostop,stopping...cmdloopreturned0"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
+
+@test "Client-Server handles quoted spaces" {
+    command ./dsh -s -p 25655 &
+    run ./dsh -c -p 25655 << EOF                
+echo " hello     world     "
+stop-server
+EOF
+
+    # Strip all whitespace (spaces, tabs, newlines) from the output
+    stripped_output=$(echo "$output" | tr -d '\t\n\r\f\v')
+
+    # Expected output with all whitespace removed for easier matching
+    expected_output="socket client mode:  addr:127.0.0.1:25655dsh4>  hello     world     dsh4> client requested server to stop, stopping...cmd loop returned 0"
+
+    # These echo commands will help with debugging and will only print
+    #if the test fails
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    # Check exact match
+    [ "$stripped_output" = "$expected_output" ]
+}
