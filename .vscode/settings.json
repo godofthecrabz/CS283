@@ -3,6 +3,9 @@
         "unistd.h": "c",
         "stdbool.h": "c",
         "errno.h": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "getopt.h": "c",
+        "argp.h": "c",
+        "rshlib.h": "c"
     }
 }
